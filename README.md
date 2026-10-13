@@ -91,6 +91,7 @@ who asks for one thing in return, which is credit. Here it is, gladly.
 - [The smoke test](#the-smoke-test)
 - [Gotchas](#gotchas)
 - [Keep going](#keep-going)
+- [Licence](#licence)
 
 ## Play it first
 
@@ -1690,5 +1691,14 @@ The short version of the things that cost an afternoon each.
   game is.
 
 This demo has siblings. The same level, with the same art and the same rules, was made
-in other engines and frameworks, and they are in the folders next to this one. This is
-the version that hands every job it can to the engine. What is left in Lua is the game.
+in other engines and frameworks. This is the version that hands every job it can to
+the engine. What is left in Lua is the game.
+
+## Licence
+
+The code of the game and the text of this course are yours to take. They are under the
+[WTFPL](LICENSE), which lets you do what you want with them, and they come with no
+warranty.
+
+The art, the music and the font are not ours to give. Each has the terms its author
+gave it, and they are in [Thank you](#thank-you).
