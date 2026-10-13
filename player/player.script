@@ -1,0 +1,386 @@
+local kinematic = require("world.kinematic")
+
+-- A script property can be read from outside with go.get(), and set per instance in
+-- the editor.
+go.property("health", 3)
+
+local SPEED = 110
+local JUMP_SPEED = 300
+local BOUNCE_SPEED = 220
+local CLIMB_SPEED = 60
+local KNOCKBACK_X, KNOCKBACK_Y = 100, 180
+local HURT_TIME = 0.4
+local INVINCIBLE_TIME = 1.2
+local BLINK_TIME = 0.2
+local BLINK_ALPHA = 0.3
+local EXIT_FADE_TIME = 0.5
+-- Landing on a crate faster than this breaks it.
+local STOMP_SPEED = 120
+-- Below this the player is out of the level, and dead.
+local FALL_LIMIT = -40
+-- From the game object's position to the top and to the bottom of the body.
+local HALF_WIDTH, HALF_HEIGHT = 10, 10
+-- An analog stick counts as pushed past this.
+local DEADZONE = 0.5
+
+local WORLD = "/world#script"
+
+-- Input actions, from input/game.input_binding
+local LEFT = hash("left")
+local RIGHT = hash("right")
+local UP = hash("up")
+local DOWN = hash("down")
+local JUMP = hash("jump")
+
+-- Collision groups
+local GROUND = hash("ground")
+local CRATE = hash("crate")
+local ENEMY = hash("enemy")
+local HAZARD = hash("hazard")
+local LADDER = hash("ladder")
+local INTERACT = hash("interact")
+
+local CONTACT_POINT_RESPONSE = hash("contact_point_response")
+local TRIGGER_RESPONSE = hash("trigger_response")
+local EXIT_LEVEL = hash("exit_level")
+local INPUT = hash("input")
+
+local ANIM_IDLE = hash("idle")
+local ANIM_RUN = hash("run")
+local ANIM_JUMP = hash("jump")
+local ANIM_FALL = hash("fall")
+local ANIM_CROUCH = hash("crouch")
+local ANIM_CLIMB = hash("climb")
+local ANIM_HURT = hash("hurt")
+
+-- States: normal, hurt (knocked back), climb (on a ladder), exiting (walking to the
+-- exit door by itself), dead, done (inside the door)
+
+
+function init(self)
+	-- Without this the engine never calls on_input() here
+	msg.post(".", "acquire_input_focus")
+
+	self.body = kinematic.new(HALF_WIDTH, HALF_HEIGHT)
+	self.state = "normal"
+	-- Directions held right now, and whether jump was pressed since the last step.
+	-- on_input() runs once per frame and fixed_update() at its own rate, so a press is
+	-- kept until a step uses it
+	self.held = {}
+	self.jump = false
+	self.invincible = false
+	-- The ladder and the lever within reach, as their triggers report them
+	self.ladder = nil
+	self.interactable = nil
+	-- Enemies already stomped (see touch_enemy)
+	self.stomped = {}
+	self.animation = nil
+
+	msg.post(WORLD, "health_changed", { health = self.health })
+end
+
+
+local function play(self, animation)
+	if self.animation ~= animation then
+		self.animation = animation
+		-- defold-vet:ignore unverifiable every caller passes one of the ANIM_ constants above
+		sprite.play_flipbook("#sprite", animation)
+	end
+end
+
+
+local function is_alive(self)
+	return self.state == "normal" or self.state == "hurt" or self.state == "climb"
+end
+
+
+local function stop_blinking(self)
+	if self.blink_timer then
+		timer.cancel(self.blink_timer)
+		self.blink_timer = nil
+	end
+	go.cancel_animations("#sprite", "tint.w")
+	go.set("#sprite", "tint.w", 1)
+	self.invincible = false
+end
+
+
+local function die(self)
+	if self.state == "dead" then
+		return
+	end
+
+	self.state = "dead"
+	self.health = 0
+	msg.post(WORLD, "health_changed", { health = 0 })
+	msg.post(WORLD, "player_died")
+
+	-- A hop, then a drop through the level: no collision object, no floor
+	msg.post("#collisionobject", "disable")
+	self.body.solid = false
+	self.body.grounded = false
+	self.body.velocity = vmath.vector3(0, JUMP_SPEED, 0)
+end
+
+
+-- from_x is where the blow came from. It picks the side of the knockback.
+local function take_damage(self, from_x)
+	if self.invincible or not (self.state == "normal" or self.state == "climb") then
+		return
+	end
+
+	self.health = self.health - 1
+	if self.health <= 0 then
+		die(self)
+		return
+	end
+	msg.post(WORLD, "health_changed", { health = self.health })
+
+	-- Blinking is a property animation on the sprite's alpha, and a timer ends it.
+	-- tint.w is the alpha of the sprite's tint
+	self.invincible = true
+	go.animate("#sprite", "tint.w", go.PLAYBACK_LOOP_PINGPONG, BLINK_ALPHA, go.EASING_LINEAR, BLINK_TIME)
+	self.blink_timer = timer.delay(INVINCIBLE_TIME, false, stop_blinking)
+
+	-- On a ladder the player holds on. A knockback there could drop it inside a wall
+	if self.state == "climb" then
+		return
+	end
+
+	self.state = "hurt"
+	self.body.grounded = false
+	self.body.velocity.x = go.get_position().x >= from_x and KNOCKBACK_X or -KNOCKBACK_X
+	self.body.velocity.y = KNOCKBACK_Y
+	timer.delay(HURT_TIME, false, function()
+		if self.state == "hurt" then
+			self.state = "normal"
+		end
+	end)
+end
+
+
+-- Both objects of a collision get a message about it, and one of them has to decide
+-- what it means. The player knows its own speed, so it decides: landing on an enemy
+-- is a stomp, anything else hurts.
+local function touch_enemy(self, message)
+	-- The contact keeps being reported until the enemy has handled "stomped" and
+	-- disabled its collision object
+	if self.stomped[message.other_id] or not is_alive(self) then
+		return
+	end
+
+	local body = self.body
+	local falling = not body.grounded and body.velocity.y < 0
+	if falling and go.get_position().y > message.other_position.y then
+		self.stomped[message.other_id] = true
+		body.velocity.y = BOUNCE_SPEED
+		msg.post(message.other_id, "stomped")
+	else
+		take_damage(self, message.other_position.x)
+	end
+end
+
+
+local function start_climb(self)
+	-- The ladder is nothing but a trigger. Its box, drawn in the editor, says how far
+	-- it reaches
+	local box = physics.get_shape(msg.url(nil, self.ladder, "collisionobject"), "box")
+	local ladder = go.get_world_position(self.ladder)
+	self.climb = {
+		top = ladder.y + box.dimensions.y / 2 - HALF_HEIGHT,
+		bottom = ladder.y - box.dimensions.y / 2 + HALF_HEIGHT,
+	}
+
+	self.state = "climb"
+	self.inside_wall = false
+	self.body.grounded = false
+	self.body.velocity = vmath.vector3()
+
+	local position = go.get_position()
+	position.x = ladder.x
+	go.set_position(position)
+end
+
+
+-- The ladder runs through gaps narrower than the player, so on it nothing is solid:
+-- the body is not moved by kinematic.move() and ground contacts are not resolved.
+local function climb(self, dt, jump)
+	if not self.ladder then
+		self.state = "normal"
+		return
+	end
+
+	local direction = (self.held[UP] and 1 or 0) - (self.held[DOWN] and 1 or 0)
+	local position = go.get_position()
+	position.y = math.min(position.y + direction * CLIMB_SPEED * dt, self.climb.top)
+
+	if position.y <= self.climb.bottom then
+		-- Reached the foot of the ladder: step off
+		position.y = self.climb.bottom
+		self.state = "normal"
+	elseif jump and not self.inside_wall then
+		-- Jumping off only works out in the open, or the player would end up stuck
+		self.state = "normal"
+		self.body.velocity.y = JUMP_SPEED
+	end
+	go.set_position(position)
+	self.inside_wall = false
+
+	-- A flipbook has no pause, but its playback rate can be zero. Playing another
+	-- animation sets the rate back to 1
+	play(self, ANIM_CLIMB)
+	go.set("#sprite", "playback_rate", direction == 0 and 0 or 1)
+end
+
+
+local function update_animation(self, direction, crouching)
+	local body = self.body
+	if direction ~= 0 then
+		sprite.set_hflip("#sprite", direction < 0)
+	end
+
+	if self.state == "hurt" or self.state == "dead" then
+		play(self, ANIM_HURT)
+	elseif not body.grounded then
+		play(self, body.velocity.y > 0 and ANIM_JUMP or ANIM_FALL)
+	elseif crouching then
+		play(self, ANIM_CROUCH)
+	elseif direction ~= 0 then
+		play(self, ANIM_RUN)
+	else
+		play(self, ANIM_IDLE)
+	end
+end
+
+
+-- Stopped in front of the exit door: fade out, then the level is over.
+local function finish_exit(self)
+	self.state = "done"
+	play(self, ANIM_IDLE)
+	stop_blinking(self)
+	go.animate("#sprite", "tint.w", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, EXIT_FADE_TIME, 0, function()
+		msg.post(WORLD, "level_complete")
+	end)
+end
+
+
+-- The game logic lives in fixed_update(), not update(): it runs at the rate set in
+-- game.project ([engine] fixed_update_frequency), in step with the physics world, so
+-- a jump is the same height at any frame rate.
+function fixed_update(self, dt)
+	local jump = self.jump
+	self.jump = false
+
+	if self.state == "done" then
+		return
+	elseif self.state == "climb" then
+		climb(self, dt, jump)
+		return
+	end
+
+	local body = self.body
+	local direction = 0
+	local crouching = false
+	if self.state == "normal" then
+		-- Not on the way up, or a jump off the ladder would grab it again at once
+		if self.ladder and self.held[UP] and body.velocity.y <= 0 then
+			start_climb(self)
+			return
+		end
+
+		crouching = body.grounded and self.held[DOWN] or false
+		if jump and body.grounded then
+			body.velocity.y = JUMP_SPEED
+		end
+		if not crouching then
+			direction = (self.held[RIGHT] and 1 or 0) - (self.held[LEFT] and 1 or 0)
+		end
+	elseif self.state == "exiting" then
+		local distance = self.exit_x - go.get_position().x
+		if math.abs(distance) > 2 then
+			direction = distance > 0 and 1 or -1
+		elseif body.grounded then
+			finish_exit(self)
+			return
+		end
+	end
+
+	-- Hurt or dead, the knockback velocity is left alone
+	if self.state == "normal" or self.state == "exiting" then
+		body.velocity.x = direction * SPEED
+	end
+
+	local floor = kinematic.move(body, dt)
+	if floor and floor.group == CRATE and body.impact > STOMP_SPEED and is_alive(self) then
+		body.grounded = false
+		body.velocity.y = BOUNCE_SPEED
+		msg.post(floor.id, "stomp")
+	end
+
+	update_animation(self, direction, crouching)
+
+	if go.get_position().y < FALL_LIMIT then
+		die(self)
+	end
+end
+
+
+function late_update(self, dt)
+	kinematic.ride(self.body)
+end
+
+
+local function handle_input(self, action_id, action)
+	if action_id == JUMP then
+		if action.pressed then
+			self.jump = true
+		end
+	elseif action_id == LEFT or action_id == RIGHT or action_id == UP or action_id == DOWN then
+		-- A key reports 1 while held and 0 when released, a stick how far it is pushed
+		self.held[action_id] = not action.released and action.value > DEADZONE
+		if action_id == UP and action.pressed and self.interactable and is_alive(self) then
+			msg.post(self.interactable, "interact")
+		end
+	end
+end
+
+
+function on_input(self, action_id, action)
+	handle_input(self, action_id, action)
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == CONTACT_POINT_RESPONSE then
+		-- Sent every step for as long as two shapes overlap
+		local group = message.other_group
+		if group == GROUND or group == CRATE then
+			if self.state == "climb" then
+				-- More than a graze means the ladder is running through a wall here
+				self.inside_wall = self.inside_wall or message.distance > 1
+			else
+				kinematic.contact(self.body, message)
+			end
+		elseif group == ENEMY then
+			touch_enemy(self, message)
+		elseif group == HAZARD then
+			take_damage(self, message.other_position.x)
+		end
+	elseif message_id == TRIGGER_RESPONSE then
+		-- Sent once on the way into a trigger and once on the way out
+		if message.other_group == LADDER then
+			self.ladder = message.enter and message.other_id or nil
+		elseif message.other_group == INTERACT then
+			self.interactable = message.enter and message.other_id or nil
+		end
+	elseif message_id == EXIT_LEVEL then
+		-- From the exit door. From here on the player walks by itself
+		if is_alive(self) then
+			self.state = "exiting"
+			self.exit_x = message.x
+		end
+	elseif message_id == INPUT then
+		-- From tests/smoke.lua, which plays the level without a keyboard
+		handle_input(self, message.action_id, message)
+	end
+end

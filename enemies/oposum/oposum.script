@@ -1,0 +1,42 @@
+local enemy = require("enemies.enemy")
+local kinematic = require("world.kinematic")
+
+local SPEED = 40
+-- Seconds between one turn and the next
+local TURN_INTERVAL = 2
+
+local STOMPED = hash("stomped")
+local CONTACT_POINT_RESPONSE = hash("contact_point_response")
+
+
+function init(self)
+	self.body = kinematic.new(13, 14)
+	self.direction = 1
+	self.timer = timer.delay(TURN_INTERVAL, true, function()
+		self.direction = -self.direction
+	end)
+end
+
+function fixed_update(self, dt)
+	if self.dead then
+		return
+	end
+
+	self.body.velocity.x = self.direction * SPEED
+	kinematic.move(self.body, dt)
+	-- The art faces left
+	sprite.set_hflip("#sprite", self.direction > 0)
+end
+
+function late_update(self, dt)
+	kinematic.ride(self.body)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == STOMPED then
+		-- From the player, which decides whether a touch is a stomp
+		enemy.die(self)
+	elseif message_id == CONTACT_POINT_RESPONSE then
+		enemy.contact(self, message)
+	end
+end

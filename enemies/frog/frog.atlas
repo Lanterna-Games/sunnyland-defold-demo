@@ -1,0 +1,36 @@
+animations {
+  id: "idle"
+  images {
+    image: "/enemies/frog/frames/idle-1.png"
+  }
+  images {
+    image: "/enemies/frog/frames/idle-2.png"
+  }
+  images {
+    image: "/enemies/frog/frames/idle-3.png"
+  }
+  images {
+    image: "/enemies/frog/frames/idle-4.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+}
+animations {
+  id: "jump"
+  images {
+    image: "/enemies/frog/frames/jump.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 5
+}
+animations {
+  id: "fall"
+  images {
+    image: "/enemies/frog/frames/fall.png"
+  }
+  playback: PLAYBACK_NONE
+  fps: 5
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

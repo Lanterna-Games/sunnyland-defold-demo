@@ -1,0 +1,630 @@
+name: "world"
+instances {
+  id: "world"
+  prototype: "/world/world.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+}
+instances {
+  id: "camera"
+  prototype: "/world/camera.go"
+  children: "sky"
+  children: "middle"
+}
+instances {
+  id: "sky"
+  prototype: "/world/background/sky.go"
+  position {
+    x: 0.0
+    y: 240.0
+    z: -0.9
+  }
+}
+instances {
+  id: "middle"
+  prototype: "/world/background/middle.go"
+  position {
+    x: 0.0
+    y: 140.0
+    z: -0.8
+  }
+}
+instances {
+  id: "props"
+  prototype: "/world/props.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: -0.5
+  }
+}
+instances {
+  id: "tilemap"
+  prototype: "/world/tilemap.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+}
+instances {
+  id: "props_front"
+  prototype: "/world/props_front.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.1
+  }
+}
+instances {
+  id: "door_gem"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 0.0
+    y: -5.0
+    z: 0.0005
+  }
+}
+instances {
+  id: "door"
+  prototype: "/objects/treasure_door.go"
+  children: "door_gem"
+  position {
+    x: 2007.0
+    y: 81.0
+    z: 0.15
+  }
+}
+instances {
+  id: "ladder"
+  prototype: "/objects/ladder.go"
+  position {
+    x: 1896.0
+    y: 146.0
+    z: 0.2
+  }
+}
+instances {
+  id: "spike_skull"
+  prototype: "/objects/spike_skull.go"
+  position {
+    x: 1816.0
+    y: 64.0
+    z: 0.201
+  }
+}
+instances {
+  id: "crusher"
+  prototype: "/objects/crusher.go"
+  position {
+    x: 2160.0
+    y: 128.0
+    z: 0.202
+  }
+}
+instances {
+  id: "crank"
+  prototype: "/objects/crank.go"
+  position {
+    x: 2212.0
+    y: 64.0
+    z: 0.203
+  }
+  component_properties {
+    id: "script"
+    properties {
+      id: "target"
+      value: "/door"
+      type: PROPERTY_TYPE_HASH
+    }
+  }
+}
+instances {
+  id: "platform_long"
+  prototype: "/objects/platform_long.go"
+  position {
+    x: 1568.0
+    y: 72.0
+    z: 0.204
+  }
+  component_properties {
+    id: "script"
+    properties {
+      id: "travel"
+      value: "0.0, 80.0, 0.0"
+      type: PROPERTY_TYPE_VECTOR3
+    }
+    properties {
+      id: "duration"
+      value: "2.5"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "small_platform"
+  prototype: "/objects/small_platform.go"
+  position {
+    x: 2360.0
+    y: 56.0
+    z: 0.205
+  }
+  component_properties {
+    id: "script"
+    properties {
+      id: "travel"
+      value: "0.0, 88.0, 0.0"
+      type: PROPERTY_TYPE_VECTOR3
+    }
+    properties {
+      id: "duration"
+      value: "2.5"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "block"
+  prototype: "/objects/block.go"
+  position {
+    x: 1176.0
+    y: 104.0
+    z: 0.206
+  }
+}
+instances {
+  id: "block2"
+  prototype: "/objects/block.go"
+  position {
+    x: 1192.0
+    y: 104.0
+    z: 0.207
+  }
+}
+instances {
+  id: "spikes_top"
+  prototype: "/objects/spikes_top.go"
+  position {
+    x: 952.0
+    y: 80.0
+    z: 0.208
+  }
+}
+instances {
+  id: "spikes_top2"
+  prototype: "/objects/spikes_top.go"
+  position {
+    x: 967.0
+    y: 80.0
+    z: 0.209
+  }
+}
+instances {
+  id: "spikes"
+  prototype: "/objects/spikes.go"
+  position {
+    x: 1672.0
+    y: 32.0
+    z: 0.21
+  }
+}
+instances {
+  id: "spikes2"
+  prototype: "/objects/spikes.go"
+  position {
+    x: 1687.0
+    y: 32.0
+    z: 0.211
+  }
+}
+instances {
+  id: "spikes3"
+  prototype: "/objects/spikes.go"
+  position {
+    x: 3224.0
+    y: 64.0
+    z: 0.212
+  }
+}
+instances {
+  id: "spikes4"
+  prototype: "/objects/spikes.go"
+  position {
+    x: 3239.0
+    y: 64.0
+    z: 0.213
+  }
+}
+instances {
+  id: "cherry19"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0005
+  }
+}
+instances {
+  id: "crate"
+  prototype: "/objects/crate.go"
+  children: "cherry19"
+  position {
+    x: 248.0
+    y: 40.0
+    z: 0.214
+  }
+}
+instances {
+  id: "cherry20"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0005
+  }
+}
+instances {
+  id: "big_crate"
+  prototype: "/objects/big_crate.go"
+  children: "cherry20"
+  position {
+    x: 2784.0
+    y: 48.0
+    z: 0.215
+  }
+}
+instances {
+  id: "crate2"
+  prototype: "/objects/crate.go"
+  position {
+    x: 2616.0
+    y: 24.0
+    z: 0.216
+  }
+}
+instances {
+  id: "block_big"
+  prototype: "/objects/block_big.go"
+  position {
+    x: 3440.0
+    y: 80.0
+    z: 0.217
+  }
+}
+instances {
+  id: "exit_door"
+  prototype: "/world/exit_door.go"
+  position {
+    x: 3530.0
+    y: 81.0
+    z: 0.3
+  }
+}
+instances {
+  id: "oposum"
+  prototype: "/enemies/oposum/oposum.go"
+  position {
+    x: 2413.0
+    y: 48.0
+    z: 0.4
+  }
+}
+instances {
+  id: "oposum3"
+  prototype: "/enemies/oposum/oposum.go"
+  position {
+    x: 2031.0
+    y: 81.0
+    z: 0.401
+  }
+}
+instances {
+  id: "oposum4"
+  prototype: "/enemies/oposum/oposum.go"
+  position {
+    x: 1144.0
+    y: 37.0
+    z: 0.402
+  }
+}
+instances {
+  id: "oposum2"
+  prototype: "/enemies/oposum/oposum.go"
+  position {
+    x: 2914.0
+    y: 62.0
+    z: 0.403
+  }
+}
+instances {
+  id: "eagle"
+  prototype: "/enemies/eagle/eagle.go"
+  position {
+    x: 319.0
+    y: 102.0
+    z: 0.404
+  }
+}
+instances {
+  id: "eagle2"
+  prototype: "/enemies/eagle/eagle.go"
+  position {
+    x: 671.0
+    y: 170.0
+    z: 0.405
+  }
+}
+instances {
+  id: "eagle3"
+  prototype: "/enemies/eagle/eagle.go"
+  position {
+    x: 1109.0
+    y: 170.0
+    z: 0.406
+  }
+}
+instances {
+  id: "eagle4"
+  prototype: "/enemies/eagle/eagle.go"
+  position {
+    x: 3362.0
+    y: 171.0
+    z: 0.407
+  }
+}
+instances {
+  id: "frog"
+  prototype: "/enemies/frog/frog.go"
+  position {
+    x: 836.0
+    y: 60.0
+    z: 0.408
+  }
+}
+instances {
+  id: "frog2"
+  prototype: "/enemies/frog/frog.go"
+  position {
+    x: 1493.0
+    y: 44.0
+    z: 0.409
+  }
+}
+instances {
+  id: "frog3"
+  prototype: "/enemies/frog/frog.go"
+  position {
+    x: 2697.0
+    y: 29.0
+    z: 0.41
+  }
+}
+instances {
+  id: "gem"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 584.0
+    y: 80.0
+    z: 0.5
+  }
+}
+instances {
+  id: "gem2"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 1600.0
+    y: 176.0
+    z: 0.501
+  }
+}
+instances {
+  id: "gem4"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 2376.0
+    y: 160.0
+    z: 0.502
+  }
+}
+instances {
+  id: "cherry"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 144.0
+    y: 88.0
+    z: 0.503
+  }
+}
+instances {
+  id: "cherry2"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 168.0
+    y: 88.0
+    z: 0.504
+  }
+}
+instances {
+  id: "cherry3"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 192.0
+    y: 88.0
+    z: 0.505
+  }
+}
+instances {
+  id: "cherry4"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 480.0
+    y: 120.0
+    z: 0.506
+  }
+}
+instances {
+  id: "cherry5"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1064.0
+    y: 120.0
+    z: 0.507
+  }
+}
+instances {
+  id: "cherry6"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1096.0
+    y: 120.0
+    z: 0.508
+  }
+}
+instances {
+  id: "cherry7"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1168.0
+    y: 160.0
+    z: 0.509
+  }
+}
+instances {
+  id: "cherry8"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1192.0
+    y: 160.0
+    z: 0.51
+  }
+}
+instances {
+  id: "cherry9"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1264.0
+    y: 128.0
+    z: 0.511
+  }
+}
+instances {
+  id: "cherry10"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 1864.0
+    y: 104.0
+    z: 0.512
+  }
+}
+instances {
+  id: "cherry11"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 2136.0
+    y: 104.0
+    z: 0.513
+  }
+}
+instances {
+  id: "cherry12"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 2648.0
+    y: 32.0
+    z: 0.514
+  }
+}
+instances {
+  id: "cherry13"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 2792.0
+    y: 104.0
+    z: 0.515
+  }
+}
+instances {
+  id: "cherry14"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 2760.0
+    y: 104.0
+    z: 0.516
+  }
+}
+instances {
+  id: "cherry15"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 2776.0
+    y: 104.0
+    z: 0.517
+  }
+}
+instances {
+  id: "cherry16"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 3312.0
+    y: 80.0
+    z: 0.518
+  }
+}
+instances {
+  id: "cherry17"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 3384.0
+    y: 80.0
+    z: 0.519
+  }
+}
+instances {
+  id: "cherry18"
+  prototype: "/pickups/cherry.go"
+  position {
+    x: 3352.0
+    y: 104.0
+    z: 0.52
+  }
+}
+instances {
+  id: "gem3"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 960.0
+    y: 64.0
+    z: 0.521
+  }
+}
+instances {
+  id: "gem5"
+  prototype: "/pickups/gem.go"
+  position {
+    x: 1896.0
+    y: 220.0
+    z: 0.522
+  }
+}
+instances {
+  id: "player"
+  prototype: "/player/player.go"
+  position {
+    x: 62.0
+    y: 60.0
+    z: 0.6
+  }
+}
+instances {
+  id: "hud"
+  prototype: "/ui/hud.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+}
+scale_along_z: 0

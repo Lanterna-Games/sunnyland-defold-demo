@@ -1,0 +1,25 @@
+-- Loads the level through a collection proxy, and loads it again from scratch when the
+-- level asks for a restart. Unloading a collection and loading it back is the simplest
+-- way to reset everything in it.
+local WORLD = "#world"
+
+
+function init(self)
+	-- Input only reaches a collection loaded by a proxy if the object that owns the
+	-- proxy has input focus
+	msg.post(".", "acquire_input_focus")
+	msg.post(WORLD, "load")
+end
+
+
+function on_message(self, message_id, message, sender)
+	-- Loading and unloading are asynchronous. The proxy answers when it is done
+	if message_id == hash("proxy_loaded") then
+		msg.post(sender, "init")
+		msg.post(sender, "enable")
+	elseif message_id == hash("restart") then
+		msg.post(WORLD, "unload")
+	elseif message_id == hash("proxy_unloaded") then
+		msg.post(WORLD, "load")
+	end
+end

@@ -1,0 +1,48 @@
+-- Follows the player without showing anything outside the level, and scrolls the
+-- background layers. The camera component on this game object does the rest: the
+-- built-in render script draws the world through whichever camera is enabled.
+go.property("target", hash("/player"))
+-- The edges of the level, in world coordinates
+go.property("limit_left", 0)
+go.property("limit_right", 3600)
+go.property("limit_bottom", 0)
+go.property("limit_top", 240)
+
+-- The background layers are children of this game object, so they move with the
+-- camera on their own and only the parallax is left to do. scroll is how much of the
+-- camera's movement a layer makes up for, mirroring the width after which its art
+-- repeats and top how far below the top of the view it hangs.
+local LAYERS = {
+	{ id = hash("/sky"), scroll = 0.5, mirroring = 768, top = 0 },
+	{ id = hash("/middle"), scroll = 0.8, mirroring = 880, top = 100 },
+}
+
+
+-- late_update() runs after every update() and after the physics world has had its
+-- say, so the player is where it will be drawn.
+function late_update(self, dt)
+	-- The camera is set to Auto Fit: the engine picks the zoom at which the display
+	-- size of game.project fits the window. A wider or taller window shows more level
+	local zoom = camera.get_orthographic_zoom("#camera") * camera.get_orthographic_auto_zoom("#camera")
+	local window_width, window_height = window.get_size()
+	local width, height = window_width / zoom, window_height / zoom
+
+	local position = go.get_position()
+	local target = go.get_position(self.target)
+	position.x = math.max(target.x, self.limit_left + width / 2)
+	position.x = math.min(position.x, self.limit_right - width / 2)
+	-- The top limit goes last: a window taller than the level shows what is below it
+	position.y = math.max(target.y, self.limit_bottom + height / 2)
+	position.y = math.min(position.y, self.limit_top - height / 2)
+	go.set_position(position)
+
+	-- Layer positions are relative to the camera, which sits in the middle of the view.
+	-- The remainder wraps a layer around so it never runs out
+	local left = position.x - width / 2
+	for _, layer in ipairs(LAYERS) do
+		local layer_position = go.get_position(layer.id)
+		layer_position.x = -width / 2 - (left * layer.scroll) % layer.mirroring
+		layer_position.y = height / 2 - layer.top
+		go.set_position(layer_position, layer.id)
+	end
+end

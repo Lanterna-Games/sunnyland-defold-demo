@@ -1,0 +1,35 @@
+local enemy = require("enemies.enemy")
+
+-- How far it flies to each side of where it starts.
+go.property("patrol_distance", 48)
+
+local SPEED = 40
+
+local STOMPED = hash("stomped")
+
+
+-- One leg of the patrol as a property animation. When it completes, the next leg
+-- starts in the other direction. The collision object follows the game object.
+local function fly(self, direction)
+	-- The art faces left
+	sprite.set_hflip("#sprite", direction > 0)
+	local to = self.start_x + direction * self.patrol_distance
+	local duration = math.abs(to - go.get_position().x) / SPEED
+	go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, to, go.EASING_LINEAR, duration, 0, function()
+		fly(self, -direction)
+	end)
+end
+
+
+function init(self)
+	self.start_x = go.get_position().x
+	fly(self, -1)
+end
+
+
+function on_message(self, message_id, message, sender)
+	-- From the player, which decides whether a touch is a stomp
+	if message_id == STOMPED then
+		enemy.die(self)
+	end
+end

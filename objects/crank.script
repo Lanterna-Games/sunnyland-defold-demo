@@ -1,0 +1,15 @@
+-- The game object that gets "open" when the crank is pulled. Set on the instance, in
+-- the collection.
+go.property("target", hash(""))
+
+local INTERACT = hash("interact")
+
+
+function on_message(self, message_id, message, sender)
+	-- From the player, when up is pressed inside the crank's trigger
+	if message_id == INTERACT and not self.pulled then
+		self.pulled = true
+		sprite.play_flipbook("#sprite", "crank-down")
+		msg.post(self.target, "open")
+	end
+end

@@ -1,0 +1,90 @@
+images {
+  image: "/world/props/big-crate.png"
+}
+images {
+  image: "/world/props/block-big.png"
+}
+images {
+  image: "/world/props/block.png"
+}
+images {
+  image: "/world/props/bush.png"
+}
+images {
+  image: "/world/props/crank-down.png"
+}
+images {
+  image: "/world/props/crank-up.png"
+}
+images {
+  image: "/world/props/crate.png"
+}
+images {
+  image: "/world/props/door-opened.png"
+}
+images {
+  image: "/world/props/door.png"
+}
+images {
+  image: "/world/props/face-block.png"
+}
+images {
+  image: "/world/props/house.png"
+}
+images {
+  image: "/world/props/palm.png"
+}
+images {
+  image: "/world/props/pine.png"
+}
+images {
+  image: "/world/props/plant-house.png"
+}
+images {
+  image: "/world/props/platform-long.png"
+}
+images {
+  image: "/world/props/rock-1.png"
+}
+images {
+  image: "/world/props/rock-2.png"
+}
+images {
+  image: "/world/props/rock.png"
+}
+images {
+  image: "/world/props/shrooms.png"
+}
+images {
+  image: "/world/props/sign.png"
+}
+images {
+  image: "/world/props/skulls.png"
+}
+images {
+  image: "/world/props/small-platform.png"
+}
+images {
+  image: "/world/props/spike-skull.png"
+}
+images {
+  image: "/world/props/spikes-top.png"
+}
+images {
+  image: "/world/props/spikes.png"
+}
+images {
+  image: "/world/props/straw-house.png"
+}
+images {
+  image: "/world/props/tree-house.png"
+}
+images {
+  image: "/world/props/tree.png"
+}
+images {
+  image: "/world/props/wooden-house.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

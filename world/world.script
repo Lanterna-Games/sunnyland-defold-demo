@@ -1,0 +1,66 @@
+-- The flow of the level: counts pickups, keeps the HUD up to date and decides when the
+-- level starts over. Nothing here runs per frame. The other scripts report what
+-- happened with messages, because a script cannot call into another one.
+local HUD = "/hud#hud"
+-- The loader lives in the bootstrap collection, hence the "main:" socket
+local LOADER = "main:/loader#loader"
+local DEATH_TIME = 1.0
+
+local CHERRY = hash("cherry")
+local GEM = hash("gem")
+local JUMP = hash("jump")
+
+local PICKUP_ADDED = hash("pickup_added")
+local PICKUP_COLLECTED = hash("pickup_collected")
+local HEALTH_CHANGED = hash("health_changed")
+local PLAYER_DIED = hash("player_died")
+local LEVEL_COMPLETE = hash("level_complete")
+local FADED = hash("faded")
+
+
+function init(self)
+	self.collected = { [CHERRY] = 0, [GEM] = 0 }
+	self.totals = { [CHERRY] = 0, [GEM] = 0 }
+	sound.play("#music")
+
+	-- "--config=test.smoke=1" on the engine's command line has the level played by a
+	-- script instead of a person (see tests/smoke.lua)
+	if sys.get_config_int("test.smoke", 0) == 1 then
+		require("tests.smoke").start()
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == PICKUP_ADDED then
+		-- Every pickup announces itself in its init(), the hidden ones included
+		self.totals[message.kind] = self.totals[message.kind] + 1
+	elseif message_id == PICKUP_COLLECTED then
+		self.collected[message.kind] = self.collected[message.kind] + 1
+		msg.post(HUD, "set_count", { kind = message.kind, count = self.collected[message.kind] })
+	elseif message_id == HEALTH_CHANGED then
+		msg.post(HUD, "set_health", { health = message.health })
+	elseif message_id == PLAYER_DIED then
+		-- Let the death hop play out, then fade. The HUD answers "faded"
+		timer.delay(DEATH_TIME, false, function()
+			msg.post(HUD, "fade_out")
+		end)
+	elseif message_id == FADED then
+		msg.post(LOADER, "restart")
+	elseif message_id == LEVEL_COMPLETE then
+		msg.post(HUD, "show_level_complete", {
+			cherries = self.collected[CHERRY],
+			cherries_total = self.totals[CHERRY],
+			gems = self.collected[GEM],
+			gems_total = self.totals[GEM],
+		})
+		-- Only now does this script want input: jump plays the level again
+		msg.post(".", "acquire_input_focus")
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == JUMP and action.pressed then
+		msg.post(".", "release_input_focus")
+		msg.post(LOADER, "restart")
+	end
+end

@@ -1,0 +1,18 @@
+image: "/enemies/eagle/eagle-attack.png"
+tile_width: 40
+tile_height: 41
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+extrude_borders: 2
+inner_padding: 0
+animations {
+  id: "fly"
+  start_tile: 1
+  end_tile: 4
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}

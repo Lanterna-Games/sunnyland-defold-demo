@@ -1,0 +1,93 @@
+images {
+  image: "/pickups/frames/cherry-1.png"
+}
+images {
+  image: "/pickups/frames/gem-1.png"
+}
+animations {
+  id: "cherry"
+  images {
+    image: "/pickups/frames/cherry-2.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-3.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-4.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-5.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-4.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-2.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-1.png"
+  }
+  images {
+    image: "/pickups/frames/cherry-1.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+}
+animations {
+  id: "gem"
+  images {
+    image: "/pickups/frames/gem-1.png"
+  }
+  images {
+    image: "/pickups/frames/gem-2.png"
+  }
+  images {
+    image: "/pickups/frames/gem-3.png"
+  }
+  images {
+    image: "/pickups/frames/gem-4.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  images {
+    image: "/pickups/frames/gem-5.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+}
+animations {
+  id: "feedback"
+  images {
+    image: "/pickups/frames/feedback-1.png"
+  }
+  images {
+    image: "/pickups/frames/feedback-2.png"
+  }
+  images {
+    image: "/pickups/frames/feedback-3.png"
+  }
+  images {
+    image: "/pickups/frames/feedback-4.png"
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 10
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

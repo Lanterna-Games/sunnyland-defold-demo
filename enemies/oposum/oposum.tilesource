@@ -1,0 +1,18 @@
+image: "/enemies/oposum/oposum.png"
+tile_width: 36
+tile_height: 28
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+extrude_borders: 2
+inner_padding: 0
+animations {
+  id: "walk"
+  start_tile: 1
+  end_tile: 6
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}

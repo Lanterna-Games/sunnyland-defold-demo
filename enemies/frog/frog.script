@@ -1,0 +1,69 @@
+local enemy = require("enemies.enemy")
+local kinematic = require("world.kinematic")
+
+local SPEED = 80
+local JUMP_SPEED = 400
+-- Seconds between one jump and the next
+local JUMP_INTERVAL = 2
+
+local ANIM_IDLE = hash("idle")
+local ANIM_JUMP = hash("jump")
+local ANIM_FALL = hash("fall")
+
+local STOMPED = hash("stomped")
+local CONTACT_POINT_RESPONSE = hash("contact_point_response")
+
+
+local function play(self, animation)
+	if self.animation ~= animation then
+		self.animation = animation
+		-- defold-vet:ignore unverifiable every caller passes one of the ANIM_ constants above
+		sprite.play_flipbook("#sprite", animation)
+	end
+end
+
+
+function init(self)
+	self.body = kinematic.new(11, 11)
+	self.direction = 1
+	-- A repeating timer: turn around and jump
+	self.timer = timer.delay(JUMP_INTERVAL, true, function()
+		self.direction = -self.direction
+		self.body.velocity.y = JUMP_SPEED
+	end)
+end
+
+
+function fixed_update(self, dt)
+	if self.dead then
+		return
+	end
+
+	-- Sits still on the floor and moves sideways in the air
+	local body = self.body
+	body.velocity.x = body.grounded and 0 or self.direction * SPEED
+	kinematic.move(body, dt)
+
+	if body.grounded then
+		play(self, ANIM_IDLE)
+	else
+		play(self, body.velocity.y > 0 and ANIM_JUMP or ANIM_FALL)
+	end
+	-- The art faces left
+	sprite.set_hflip("#sprite", self.direction > 0)
+end
+
+
+function late_update(self, dt)
+	kinematic.ride(self.body)
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == STOMPED then
+		-- From the player, which decides whether a touch is a stomp
+		enemy.die(self)
+	elseif message_id == CONTACT_POINT_RESPONSE then
+		enemy.contact(self, message)
+	end
+end

@@ -1,0 +1,11 @@
+local TRIGGER_RESPONSE = hash("trigger_response")
+
+
+function on_message(self, message_id, message, sender)
+	-- The only thing in the trigger's mask is the player, so this is the player
+	if message_id == TRIGGER_RESPONSE and message.enter and not self.opened then
+		self.opened = true
+		sprite.play_flipbook("#sprite", "door-opened")
+		msg.post(message.other_id, "exit_level", { x = go.get_position().x })
+	end
+end

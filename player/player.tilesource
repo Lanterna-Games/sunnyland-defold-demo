@@ -1,0 +1,81 @@
+image: "/player/player.png"
+tile_width: 33
+tile_height: 32
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+extrude_borders: 2
+inner_padding: 0
+animations {
+  id: "idle"
+  start_tile: 1
+  end_tile: 4
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "run"
+  start_tile: 7
+  end_tile: 12
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "climb"
+  start_tile: 13
+  end_tile: 16
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "crouch"
+  start_tile: 20
+  end_tile: 21
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "hurt"
+  start_tile: 25
+  end_tile: 26
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "jump"
+  start_tile: 31
+  end_tile: 31
+  playback: PLAYBACK_NONE
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "fall"
+  start_tile: 32
+  end_tile: 32
+  playback: PLAYBACK_NONE
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "hud_icon"
+  start_tile: 1
+  end_tile: 1
+  playback: PLAYBACK_NONE
+  fps: 12
+  flip_horizontal: 0
+  flip_vertical: 0
+}

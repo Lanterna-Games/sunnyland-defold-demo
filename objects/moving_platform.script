@@ -1,0 +1,13 @@
+-- From where the platform starts to the other end of its route.
+go.property("travel", vmath.vector3(0, 64, 0))
+-- Seconds from one end to the other.
+go.property("duration", 2.0)
+
+
+function init(self)
+	-- All of the movement is one property animation. A ping-pong goes there and back
+	-- within its duration, with the easing applied to each leg. The collision object
+	-- follows the game object, and what stands on it follows too (see kinematic.lua)
+	local to = go.get_position() + self.travel
+	go.animate(".", "position", go.PLAYBACK_LOOP_PINGPONG, to, go.EASING_INOUTSINE, self.duration * 2)
+end

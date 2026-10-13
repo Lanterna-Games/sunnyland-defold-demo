@@ -1,0 +1,29 @@
+local FEEDBACK = "/world#feedback"
+local FEEDBACK_Z = 0.7
+
+local STASHED = hash("stashed")
+local STOMP = hash("stomp")
+
+
+function init(self)
+	self.contents = {}
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == STASHED then
+		-- From a pickup placed as a child of this crate in the collection.
+		-- sender.path is the id of its game object
+		table.insert(self.contents, sender.path)
+	elseif message_id == STOMP then
+		-- From the player, when it lands on the crate hard enough
+		for _, id in ipairs(self.contents) do
+			msg.post(id, "enable")
+		end
+
+		local position = go.get_position()
+		position.z = FEEDBACK_Z
+		factory.create(FEEDBACK, position)
+		go.delete()
+	end
+end

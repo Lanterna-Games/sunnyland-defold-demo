@@ -1,0 +1,39 @@
+-- One script for both pickups. The kind comes from a script property set in each .go.
+-- Properties have no string type, hence the hash.
+go.property("kind", hash("cherry"))
+
+local WORLD = "/world#script"
+-- Any script can spawn from any factory. This one belongs to the world game object
+local FEEDBACK = "/world#feedback"
+local FEEDBACK_Z = 0.7
+
+local TRIGGER_RESPONSE = hash("trigger_response")
+
+
+function init(self)
+	msg.post(WORLD, "pickup_added", { kind = self.kind })
+
+	-- A pickup placed as a child of a crate or of the temple door starts out hidden
+	-- inside it. It leaves the parent right away, keeping its place in the world, so it
+	-- stays behind when the crate is deleted. "disable" sent to a game object reaches
+	-- all of its components: no sprite, no trigger
+	local parent = go.get_parent()
+	if parent then
+		go.set_parent(".", nil, true)
+		msg.post(".", "disable")
+		msg.post(parent, "stashed")
+	end
+end
+
+
+function on_message(self, message_id, message, sender)
+	-- The only thing in the trigger's mask is the player
+	if message_id == TRIGGER_RESPONSE and message.enter then
+		msg.post(WORLD, "pickup_collected", { kind = self.kind })
+
+		local position = go.get_position()
+		position.z = FEEDBACK_Z
+		factory.create(FEEDBACK, position)
+		go.delete()
+	end
+end

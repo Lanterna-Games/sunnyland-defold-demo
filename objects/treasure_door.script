@@ -1,0 +1,16 @@
+local STASHED = hash("stashed")
+local OPEN = hash("open")
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == STASHED then
+		-- From the gem placed as a child of the door in the collection
+		self.gem = sender.path
+	elseif message_id == OPEN then
+		-- From the crank
+		sprite.play_flipbook("#sprite", "door-opened")
+		if self.gem then
+			msg.post(self.gem, "enable")
+		end
+	end
+end

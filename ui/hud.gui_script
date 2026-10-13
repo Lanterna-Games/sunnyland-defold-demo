@@ -1,0 +1,34 @@
+-- The HUD. A gui_script has the gui.* functions and cannot use go.*, so it cannot ask
+-- a game object for anything: everything it shows arrives as a message.
+-- Nothing here deals with the size of the window: the nodes carry anchors and adjust
+-- modes, set in hud.gui, and the engine keeps them in place.
+local FADE_TIME = 0.4
+
+local CHERRY = hash("cherry")
+
+local SET_HEALTH = hash("set_health")
+local SET_COUNT = hash("set_count")
+local FADE_OUT = hash("fade_out")
+local SHOW_LEVEL_COMPLETE = hash("show_level_complete")
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == SET_HEALTH then
+		gui.set_text(gui.get_node("health"), tostring(message.health))
+	elseif message_id == SET_COUNT then
+		local node = message.kind == CHERRY and gui.get_node("cherry") or gui.get_node("gem")
+		gui.set_text(node, tostring(message.count))
+	elseif message_id == FADE_OUT then
+		-- Fades until the screen is covered and tells whoever asked
+		gui.animate(gui.get_node("fade"), "color.w", 1.0, gui.EASING_LINEAR, FADE_TIME, 0, function()
+			msg.post(sender, "faded")
+		end)
+	elseif message_id == SHOW_LEVEL_COMPLETE then
+		gui.set_text(gui.get_node("cherries"), string.format("Cherries  %d / %d", message.cherries, message.cherries_total))
+		gui.set_text(gui.get_node("gems"), string.format("Gems  %d / %d", message.gems, message.gems_total))
+		gui.set_enabled(gui.get_node("level_complete"), true)
+
+		-- Dims the level behind the panel
+		gui.animate(gui.get_node("fade"), "color.w", 0.6, gui.EASING_LINEAR, FADE_TIME)
+	end
+end

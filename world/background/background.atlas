@@ -1,0 +1,9 @@
+images {
+  image: "/world/background/back.png"
+}
+images {
+  image: "/world/background/middle.png"
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0

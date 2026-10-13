@@ -1,0 +1,71 @@
+-- A block that slams down on whoever walks under it. Its game object carries three
+-- collision objects, and their messages all land in this script. own_group tells them
+-- apart:
+--   body      the block itself, solid
+--   trigger   the column below it, which sets it off
+--   hurtbox   a strip under its face, enabled only on the way down
+-- How far the slam goes. The trigger column covers the same distance.
+go.property("drop_distance", 48)
+
+local WARN_TIME = 0.3
+local FALL_TIME = 0.25
+local HOLD_TIME = 0.6
+local RISE_TIME = 1.0
+
+local TRIGGER_RESPONSE = hash("trigger_response")
+local CONTACT_POINT_RESPONSE = hash("contact_point_response")
+local HAZARD = hash("hazard")
+
+local slam
+
+
+-- Holds for a moment and goes back up slowly. go.animate() takes a delay, so the hold
+-- needs no timer.
+local function rise(self)
+	self.falling = false
+	msg.post("#hurtbox", "disable")
+	go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, self.top, go.EASING_LINEAR, RISE_TIME, HOLD_TIME, function()
+		self.resting = true
+		if self.player_below then
+			slam(self)
+		end
+	end)
+end
+
+
+-- Waits a moment, as a warning, then drops.
+function slam(self)
+	self.resting = false
+	timer.delay(WARN_TIME, false, function()
+		self.falling = true
+		msg.post("#hurtbox", "enable")
+		local bottom = self.top - self.drop_distance
+		go.animate(".", "position.y", go.PLAYBACK_ONCE_FORWARD, bottom, go.EASING_LINEAR, FALL_TIME, 0, function()
+			rise(self)
+		end)
+	end)
+end
+
+
+function init(self)
+	self.top = go.get_position().y
+	self.resting = true
+	self.falling = false
+	self.player_below = false
+	msg.post("#hurtbox", "disable")
+end
+
+
+function on_message(self, message_id, message, sender)
+	if message_id == TRIGGER_RESPONSE then
+		self.player_below = message.enter
+		if self.resting and self.player_below then
+			slam(self)
+		end
+	elseif message_id == CONTACT_POINT_RESPONSE and message.own_group == HAZARD and self.falling then
+		-- The hurtbox reached the player, who takes the damage on its own (the hurtbox
+		-- is in the hazard group, like the spikes). Stop short of going through
+		go.cancel_animations(".", "position.y")
+		rise(self)
+	end
+end

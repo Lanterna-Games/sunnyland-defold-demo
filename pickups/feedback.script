@@ -1,0 +1,6 @@
+function init(self)
+	-- Plays once and deletes itself when the animation is done
+	sprite.play_flipbook("#sprite", "feedback", function()
+		go.delete()
+	end)
+end
